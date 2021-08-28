@@ -21,6 +21,7 @@ import Button from '../../components/Button';
 import { Container, Title, BackTiSignIn, BackTiSignInText } from './styles';
 
 import logoImg from '../../assets/logo.png';
+import api from '../../services/api';
 
 interface SignUpFormData {
   user: string;
@@ -35,23 +36,24 @@ const SignUp: React.FC = () => {
 
   const navigation = useNavigation();
 
-  const handleSignUp = useCallback(async (data: SignUpFormData) => {
-    try {
-      formRef.current?.setErrors({});
+  const handleSignUp = useCallback(
+    async (data: SignUpFormData) => {
+      try {
+        formRef.current?.setErrors({});
 
-      const schema = Yup.object().shape({
-        name: Yup.string().required('Nome obrigatório'),
-        email: Yup.string()
-          .required('E-mail obrigatório')
-          .email('Digite um email válido'),
-        password: Yup.string().min(6, 'No mínimo 6 digitos'),
-      });
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Nome obrigatório'),
+          email: Yup.string()
+            .required('E-mail obrigatório')
+            .email('Digite um email válido'),
+          password: Yup.string().min(6, 'No mínimo 6 digitos'),
+        });
 
-      await schema.validate(data, { abortEarly: false });
+        await schema.validate(data, { abortEarly: false });
 
-      // await api.post('/users', data);
+        await api.post('/users', data);
 
-      /*
+        /*
         //Sem redirecionamento para o login apos o cadastro
         await signIn({ email: data.email, password: data.password });
 
@@ -64,21 +66,28 @@ const SignUp: React.FC = () => {
         });
         */
 
-      // Com redirecionamento para o login apos o cadastro
-      // history.push('/');
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(err);
-        formRef.current?.setErrors(errors);
-        return;
-      }
+        // Com redirecionamento para o login apos o cadastro
+        Alert.alert(
+          'Parabens',
+          'Cadastra realizado com sucesso, você ja pode fazer login na aplicação',
+        );
 
-      Alert.alert(
-        'Erro no cadastro',
-        'Ocorreu um erro no cadastro, por favor tente novamente',
-      );
-    }
-  }, []);
+        navigation.goBack();
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formRef.current?.setErrors(errors);
+          return;
+        }
+
+        Alert.alert(
+          'Erro no cadastro',
+          'Ocorreu um erro no cadastro, por favor tente novamente',
+        );
+      }
+    },
+    [navigation],
+  );
 
   return (
     <>
